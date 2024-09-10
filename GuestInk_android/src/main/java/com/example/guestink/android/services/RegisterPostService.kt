@@ -2,6 +2,8 @@ package com.example.guestink.android.services
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleCoroutineScope
 
 import androidx.navigation.NavHostController
@@ -36,3 +38,4 @@ fun postRegisterUser(user: User, navController: NavHostController, lifecycleScop
         })
     }
 }
+

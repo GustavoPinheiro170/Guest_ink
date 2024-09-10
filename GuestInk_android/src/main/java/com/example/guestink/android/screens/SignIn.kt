@@ -17,8 +17,11 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,8 +29,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.internal.enableLiveLiterals
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +46,9 @@ import com.example.guestink.android.MyApplicationTheme
 import com.example.guestink.android.R
 import com.example.guestink.android.models.User
 import com.example.guestink.android.utils.OrionObject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.core.context.startKoin
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -61,6 +69,9 @@ fun SignInScreen(
     }
     var showPassword by remember { mutableStateOf(value = false) }
 
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope() // Create a coroutine scope
+
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -69,7 +80,6 @@ fun SignInScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
 
 
         Image(
@@ -137,8 +147,16 @@ fun SignInScreen(
                 containerColor = Color.Black,
             ),
             onClick = {
-                logUserAndPassword(email, password)
-                onEntryAccount(User(email, password))
+                scope.launch {
+                    loading = true;
+                    loadProgress {  }
+                    logUserAndPassword(email, password)
+                    onEntryAccount(User(email, password))
+                    loading = false
+                }
+
+
+
             },
             modifier = Modifier
                 .padding(8.dp)
@@ -156,7 +174,12 @@ fun SignInScreen(
         ) {
             TextButton(
                 onClick = {
-                    onSignUpClick()
+                    loading = true
+                    scope.launch {
+                        onSignUpClick()
+                        loading = false // Reset loading when the coroutine finishes
+                    }
+
                 })
             {
                 Text(text = "Cadastrar-se")
@@ -167,12 +190,28 @@ fun SignInScreen(
                 Text(text = "Recuperar Acesso")
             }
         }
+        if (loading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth()
+                    .background(Color.Black),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+
+                )
+        }
 
     }
 
 
 }
 
+
+suspend fun loadProgress(updateProgress: (Float) -> Unit) {
+    for (i in 1..100) {
+        updateProgress(i.toFloat() / 50)
+        delay(10)
+    }
+}
 
 private fun logUserAndPassword(user: String, password: String) {
     Log.d("Usuario", user)

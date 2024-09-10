@@ -4,6 +4,7 @@ import RequestLocationPermission
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.Spinner
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +31,8 @@ import retrofit2.Response
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("CoroutineCreationDuringComposition")
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -45,9 +48,7 @@ class MainActivity : ComponentActivity() {
                 onGetCurrentLocationFailed = {},
                 context = this
             )
-            val orionServices by lazy {
-                orionServices()
-            }
+
 
             MyApplicationTheme {
                 val navController = rememberNavController()
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
                                 user = User(user, ""),
                                 location = userLocation,
                                 onBackToSignIn = {
-                                    navController.navigate("signUp")
+                                    navController.navigate("SignIn")
                                 })
 
                         } ?: LaunchedEffect(null) {
@@ -84,15 +85,16 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("SignIn")
                             },
                             onRegisterUser = { user ->
-                               postRegisterUser(user, navController, lifecycleScope)
+                                postRegisterUser(user, navController, lifecycleScope)
                             }
-
                         )
                     }
                     composable("RegisterAddress") {
-                        RegisterAddressUser(onRegisterAddress = { /*TODO*/ }) {
-
-                        }
+                        RegisterAddressUser(
+                            onRegisterAddress = {},
+                            onBackToRegister = {
+                                navController.navigate("SignUp")
+                            })
                     }
                     composable("RecoveryAccount") {
                         RecoveryAccount(
